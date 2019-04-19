@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huarui.green.dao.ProjectDao">
+    
+    <select id="get" resultMap="ProjectMap">
+        SELECT 
+            p.*,
+            o.name AS "officeName",
+            a.name AS "areaName"
+        FROM project p
+        LEFT JOIN sys_office o ON o.id = p.belong_office
+        LEFT JOIN sys_area a ON a.id = p.area_id
+        WHERE p.id = #{id}
+    </select>
+
+    <resultMap type="Project" id="ProjectMap">
+        <result property="id" column="id" />
+        <collection property="cameras" ofType="com.huarui.green.entity.ProjectCamera"
+                    column="id" select="getCameraList"></collection>
+        <collection property="companies" ofType="com.huarui.green.entity.ProjectCompany"
+                    column="id" select="getCompanyList"></collection>
+    </resultMap>
+
+    <select id="getCameraList" resultType="com.huarui.green.entity.ProjectCamera">
+        SELECT c.* FROM project_camera c WHERE c.project_id=#{id}
+    </select>
+
+    <select id="getCompanyList" resultType="com.huarui.green.entity.ProjectCompany">
+        SELECT c.* FROM project_company c WHERE c.project_id=#{id}
+    </select>
+
+    <select id="getByCode" resultType="Project">
+        SELECT
+        p.*
+        FROM project p
+        WHERE p.code = #{code}
+    </select>
+
+    <select id="getCodeById" resultType="String">
+        SELECT
+        p.code
+        FROM project p
+        WHERE p.id = #{id}
+    </select>
+
+    <select id="findList" resultType="Project">
+        SELECT 
+            p.*,
+            o.name AS "officeName",
+            a.name AS "areaName"
+        FROM project p
+        LEFT JOIN sys_office o ON o.id = p.belong_office
+        LEFT JOIN sys_office f ON f.id = p.create_office
+        LEFT JOIN sys_area a ON a.id = p.area_id
+        WHERE p.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="name!=null and name!=''">
+            AND p.name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        <if test="type!=null and type!=''">
+            AND p.type = #{type}
+        </if>
+        <if test="service!=null and service!=''">
+            AND p.service LIKE CONCAT(CONCAT('%',#{service}),'%')
+        </if>
+        ${sqlMap.dsf}
+
+        ORDER BY p.create_date DESC
+    </select>
+
+    <select id="findAllList" resultType="Project">
+        SELECT
+        p.*,
+        o.name AS "officeName",
+        a.name AS "areaName"
+        FROM project p
+        LEFT JOIN sys_office o ON o.id = p.belong_office
+        LEFT JOIN sys_area a ON a.id = p.area_id
+        WHERE p.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="name!=null and name!=''">
+            AND p.name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        <if test="type!=null and type!=''">
+            AND p.type = #{type}
+        </if>
+        <if test="service!=null and service!=''">
+            AND p.service LIKE CONCAT(CONCAT('%',#{service}),'%')
+        </if>
+
+        ORDER BY p.create_date DESC
+    </select>
+
+
+    <insert id="insert">
+        INSERT INTO project(
+        id,
+        name,
+        belong_office,
+        area_id,
+        status,
+        type,
+        code,
+        discharge_permit,
+        evaluation,
+        location,
+        address,
+        zoom,
+        boundary,
+        contact,
+        contact_number,
+        service,
+        create_by,
+        create_office,
+        create_date,
+        update_by,
+        update_date,
+        remarks,
+        del_flag
+        ) VALUES (
+        #{id},
+        #{name},
+        #{belongOffice},
+        #{areaId},
+        #{status},
+        #{type},
+        #{code},
+        #{dischargePermit},
+        #{evaluation},
+        #{location},
+        #{address},
+        #{zoom},
+        #{boundary},
+        #{contact},
+        #{contactNumber},
+        #{service},
+        #{createBy.id},
+        #{createOffice},
+        #{createDate},
+        #{updateBy.id},
+        #{updateDate},
+        #{remarks},
+        #{delFlag}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE project SET
+        name = #{name},
+        area_id = #{areaId},
+        code = #{code},
+        address = #{address},
+        location = #{location},
+        zoom = #{zoom},
+        boundary = #{boundary},
+        contact = #{contact},
+        contact_number = #{contactNumber},
+        service = #{service},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM project
+        WHERE id = #{id}
+    </delete>
+
+    <update id="disable">
+        UPDATE project SET
+        status = '1'
+        WHERE id = #{id}
+    </update>
+
+    <update id="enable">
+        UPDATE project SET
+        status = '0'
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertCamera">
+        INSERT INTO project_camera(
+        id,
+        name,
+        project_id,
+        camera_id,
+        lng,
+        lat
+        ) VALUES (
+        #{id},
+        #{name},
+        #{projectId},
+        #{cameraId},
+        #{lng},
+        #{lat}
+        )
+    </insert>
+
+    <delete id="deleteCamera">
+        DELETE FROM project_camera
+        WHERE project_id = #{id}
+    </delete>
+
+    <insert id="insertCompany">
+        INSERT INTO project_company(
+        id,
+        name,
+        project_id,
+        office_id,
+        lng,
+        lat
+        ) VALUES (
+        #{id},
+        #{name},
+        #{projectId},
+        #{officeId},
+        #{lng},
+        #{lat}
+        )
+    </insert>
+
+    <delete id="deleteCompany">
+        DELETE FROM project_company
+        WHERE project_id = #{id}
+    </delete>
+
+</mapper>

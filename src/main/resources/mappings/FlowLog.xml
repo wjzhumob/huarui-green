@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huarui.green.dao.FlowLogDao">
+    
+    <select id="get" resultType="com.huarui.green.entity.FlowLog">
+        SELECT 
+            f.*
+        FROM flow_log f
+        WHERE f.id = #{id}
+    </select>
+
+    <select id="findList" resultType="com.huarui.green.entity.FlowLog">
+        SELECT 
+            f.*,
+            u.name AS "userName"
+        FROM flow_log f
+        LEFT JOIN sys_user u ON u.id = f.user_id
+        WHERE f.source_id = #{sourceId}
+        <if test="userId!=null and userId!=''">
+           AND f.user_id = #{userId}
+        </if>
+        ORDER BY f.create_date DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO flow_log(
+        id,
+        source_id,
+        source_type,
+        task_id,
+        task_name,
+        user_id,
+        remarks,
+        create_date,
+        model_id,
+        model_name,
+        url
+        ) VALUES (
+        #{id},
+        #{sourceId},
+        #{sourceType},
+        #{taskId},
+        #{taskName},
+        #{userId},
+        #{remarks},
+        #{createDate},
+        #{modelId},
+        #{modelName},
+        #{url}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE flow_log SET
+        remarks = #{remarks}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteFlowLog">
+        DELETE FROM flow_log
+        WHERE source_id = #{sourceId}
+    </delete>
+
+
+</mapper>

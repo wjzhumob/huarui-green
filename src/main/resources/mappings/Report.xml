@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huarui.green.dao.ReportDao">
+
+    <sql id="ReportColumns">
+        r.id,
+        r.type,
+        r.status,
+        r.rate,
+        r.project_id,
+        r.deployment_id,
+        r.service_name,
+        r.temp_files,
+        r.other_files,
+        r.create_by AS "createBy.id",
+        r.create_date,
+        r.remarks,
+        r.users,
+        p.name AS "projectName",
+        r.del_flag
+    </sql>
+
+    <select id="get" resultType="Report">
+        SELECT
+        <include refid="ReportColumns" />
+        FROM report r
+        LEFT JOIN project p ON p.id = r.project_id
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="findList" resultType="Report">
+        SELECT
+        <include refid="ReportColumns" />
+        FROM report r
+        LEFT JOIN project p ON p.id = r.project_id
+        LEFT JOIN sys_office o ON o.id = p.belong_office
+        LEFT JOIN sys_office f ON f.id = p.create_office
+        WHERE r.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="type!=null and type!=''">
+            AND r.type = #{type}
+        </if>
+        <if test="projectId!=null and projectId!=''">
+            AND r.project_id = #{projectId}
+        </if>
+        <if test="projectName!=null and projectName!=''">
+            AND p.name LIKE CONCAT(CONCAT('%',#{projectName}),'%')
+        </if>
+        <if test="serviceName!=null and serviceName!=''">
+            AND r.service_name LIKE CONCAT(CONCAT('%',#{serviceName}),'%')
+        </if>
+        <if test="status!=null and status!=''">
+            AND r.status = #{status}
+        </if>
+        ${sqlMap.dsf}
+        ORDER BY r.create_date DESC
+    </select>
+
+    <select id="findAllList" resultType="Report">
+        SELECT
+        <include refid="ReportColumns" />
+        FROM report r
+        LEFT JOIN project p ON p.id = r.project_id
+        LEFT JOIN sys_office o ON o.id = p.belong_office
+        LEFT JOIN sys_office f ON f.id = p.create_office
+        WHERE r.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="type!=null and type!=''">
+            AND r.type = #{type}
+        </if>
+        <if test="projectId!=null and projectId!=''">
+            AND r.project_id = #{projectId}
+        </if>
+        <if test="projectName!=null and projectName!=''">
+            AND p.name LIKE CONCAT(CONCAT('%',#{projectName}),'%')
+        </if>
+        <if test="serviceName!=null and serviceName!=''">
+            AND r.service_name LIKE CONCAT(CONCAT('%',#{serviceName}),'%')
+        </if>
+        <if test="status!=null and status!=''">
+            AND r.status = #{status}
+        </if>
+        ORDER BY r.create_date DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO report(
+        id,
+        type,
+        deployment_id,
+        project_id,
+        service_name,
+        status,
+        create_by,
+        create_date,
+        remarks,
+        users,
+        del_flag
+        ) VALUES (
+        #{id},
+        #{type},
+        #{deploymentId},
+        #{projectId},
+        #{serviceName},
+        #{status},
+        #{createBy.id},
+        #{createDate},
+        #{remarks},
+        #{users},
+        #{delFlag}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE report SET
+        temp_files = #{tempFiles},
+        other_files = #{otherFiles},
+        remarks = #{remarks}
+        WHERE id = #{id}
+    </update>
+
+    <update id="saveRate">
+        UPDATE report SET
+        rate = #{rate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="changeStatus">
+        UPDATE report SET
+        status = '1'
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteReport">
+        DELETE FROM report
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

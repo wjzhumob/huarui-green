@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huarui.green.dao.CameraDao">
+    
+    <select id="get" resultType="Camera">
+        SELECT 
+            c.*
+        FROM camera c
+        WHERE c.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="Camera">
+        SELECT 
+            c.*
+        FROM camera c
+        WHERE c.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="status!=null and status!=''">
+            AND c.status = #{status}
+        </if>
+        <if test="projectId!=null and projectId!=''">
+            AND c.project_id = #{projectId}
+        </if>
+        <if test="name!=null and name!=''">
+            AND c.name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        ORDER BY c.create_date DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO camera(
+        id,
+        name,
+        place,
+        status,
+        camera_group,
+        camera_type,
+        camera_id,
+        camera_ip,
+        camera_port,
+        create_by,
+        create_date,
+        update_by,
+        update_date,
+        remarks,
+        del_flag,
+        group_name,
+        group_id,
+        project_id
+        ) VALUES (
+        #{id},
+        #{name},
+        #{place},
+        #{status},
+        #{cameraGroup},
+        #{cameraType},
+        #{cameraId},
+        #{cameraIp},
+        #{cameraPort},
+        #{createBy.id},
+        #{createDate},
+        #{updateBy.id},
+        #{updateDate},
+        #{remarks},
+        #{delFlag},
+        #{groupName},
+        #{groupId},
+        #{projectId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE camera SET
+        name = #{name},
+        place = #{place},
+        status = #{status},
+        camera_group = #{cameraGroup},
+        camera_type = #{cameraType},
+        camera_id = #{cameraId},
+        camera_ip = #{cameraIp},
+        camera_port = #{cameraPort},
+        update_by = #{updateBy},
+        update_date = #{updateDate},
+        remarks = #{remarks},
+        group_name = #{groupName},
+        group_id = #{groupId}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE camera SET
+        status = #{status}
+        WHERE
+        device_id = #{deviceId}
+    </update>
+
+    <update id="delete">
+        UPDATE camera SET
+        del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findCameraData" resultType="com.huarui.green.entity.CameraData">
+        SELECT
+        c.source_id AS "sourceId",
+        c.serial_no AS "serialNo",
+        c.show_name AS "showName",
+        c.cam_no AS "camNo",
+        c.cover_url AS "coverUrl",
+        c.get_url AS "getUrl"
+        FROM camera_data c
+        WHERE c.project_code = #{projectCode}
+        ORDER BY c.serial_no
+    </select>
+
+
+</mapper>
